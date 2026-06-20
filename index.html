@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>An invitation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+.wrap {
+  --rose:#e57089; --coral:#ef926e; --gold:#f0b65a; --goldDeep:#d99a37;
+  --cream:#fdf2e9; --creamDim:#e7c9bf; --panel:#fbf1e8;
+  --ink:#3a2230; --inkSoft:#7c5a5f; --wine:#7a2438;
+  min-height: 100vh; width: 100%;
+  position: relative; overflow-x: hidden;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #7a2438 0%, #5a2336 38%, #2a1726 100%);
+  color: var(--cream);
+  font-family: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+  display: flex; justify-content: center;
+  padding: 28px 18px 56px;
+}
+.glow {
+  position: fixed; left: 50%; top: -8%; width: 520px; height: 520px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(240,182,90,.42) 0%, rgba(240,182,90,.12) 35%, transparent 70%);
+  filter: blur(8px); pointer-events: none; z-index: 0;
+  animation: glowPulse 6s ease-in-out infinite;
+}
+@keyframes glowPulse { 0%,100%{opacity:.85; transform:translateX(-50%) scale(1);} 50%{opacity:1; transform:translateX(-50%) scale(1.06);} }
+.embers { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.embers span {
+  position: absolute; bottom: -12px; width: 5px; height: 5px; border-radius: 50%;
+  left: calc(7% * var(--i));
+  background: radial-gradient(circle, #f0b65a, rgba(240,182,90,0));
+  opacity: 0;
+  animation: rise calc(9s + (var(--i) * 0.7s)) linear infinite;
+  animation-delay: calc(var(--i) * -0.9s);
+}
+@keyframes rise {
+  0% { transform: translateY(0) scale(.6); opacity: 0; }
+  12% { opacity: .8; }
+  85% { opacity: .5; }
+  100% { transform: translateY(-104vh) translateX(20px) scale(1.1); opacity: 0; }
+}
+.stage { position: relative; z-index: 1; width: 100%; max-width: 440px; }
+.scene { animation: fadeUp .5s cubic-bezier(.2,.7,.2,1) both; }
+.scene.center { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 22px; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.eyebrow { letter-spacing: .42em; text-transform: uppercase; font-size: 11px; font-weight: 700; color: var(--gold); margin: 6px 0 2px; }
+.display {
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  font-weight: 600; line-height: 1.04; letter-spacing: .2px;
+  font-size: clamp(40px, 12vw, 58px); margin: 0;
+  text-shadow: 0 2px 30px rgba(0,0,0,.35);
+}
+.display.sm { font-size: clamp(34px, 10vw, 46px); }
+.name { font-style: italic; color: var(--gold); }
+.sub { color: var(--creamDim); font-size: 16px; line-height: 1.5; margin: 2px 0 6px; max-width: 30ch; }
+.center-t { text-align: center; margin-inline: auto; }
+.hearts-top { animation: bob 3s ease-in-out infinite; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+.big-emoji { font-size: 56px; line-height: 1; }
+.spark { animation: bob 3s ease-in-out infinite; color: var(--gold); }
+.float-soft { animation: bob 3.4s ease-in-out infinite; }
+
+.btn-row { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+.btn-row.col { flex-direction: column; width: 100%; align-items: stretch; }
+.btn {
+  font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer;
+  border: none; border-radius: 999px; padding: 15px 30px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease, filter .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(.96); }
+.btn-yes {
+  color: #3a1220;
+  background: linear-gradient(135deg, var(--gold), var(--coral) 55%, var(--rose));
+  box-shadow: 0 10px 26px rgba(239,146,110,.4), inset 0 1px 0 rgba(255,255,255,.4);
+}
+.btn-yes:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(239,146,110,.5); }
+.btn-yes:disabled { filter: grayscale(.5) brightness(.85); opacity: .55; cursor: not-allowed; box-shadow: none; transform: none; }
+.btn-ghost {
+  color: var(--cream); background: rgba(255,255,255,.08);
+  border: 1px solid rgba(253,242,233,.35);
+}
+.btn-ghost:hover { background: rgba(255,255,255,.14); }
+.btn-quiet { color: var(--creamDim); background: transparent; padding: 12px 18px; font-weight: 600; font-size: 14px; }
+.btn-quiet:hover { color: var(--cream); }
+.wide, .full { width: 100%; }
+.full { margin-top: 22px; padding: 17px; font-size: 17px; }
+.center-self { align-self: center; margin-top: 4px; }
+
+.plan-head { text-align: center; margin-bottom: 8px; }
+.yay {
+  display: inline-flex; align-items: center; gap: 8px; color: var(--gold);
+  font-weight: 700; letter-spacing: .04em; font-size: 15px;
+  background: rgba(240,182,90,.12); border: 1px solid rgba(240,182,90,.3);
+  padding: 8px 16px; border-radius: 999px;
+}
+.step {
+  display: flex; align-items: center; gap: 9px; color: var(--cream);
+  font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600;
+  font-size: 24px; margin: 26px 2px 12px;
+}
+.step svg { color: var(--gold); }
+
+.card {
+  background: var(--panel); color: var(--ink);
+  border-radius: 20px; padding: 16px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.28);
+}
+
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.cal-title { font-family: "Cormorant Garamond", Georgia, serif; font-size: 22px; font-weight: 600; color: var(--wine); }
+.cal-nav {
+  border: none; background: rgba(122,36,56,.08); color: var(--wine);
+  width: 38px; height: 38px; border-radius: 12px; cursor: pointer;
+  display: grid; place-items: center; transition: background .15s;
+}
+.cal-nav:hover { background: rgba(122,36,56,.16); }
+.cal-nav:disabled { opacity: .3; cursor: not-allowed; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+.cal-dow { margin-bottom: 4px; }
+.dow { text-align: center; font-size: 11px; font-weight: 700; color: var(--inkSoft); padding: 4px 0; }
+.day {
+  aspect-ratio: 1; border: none; background: transparent; cursor: pointer;
+  border-radius: 12px; font-family: inherit; font-size: 15px; font-weight: 600;
+  color: var(--ink); transition: background .12s, transform .1s, color .12s;
+}
+.day:hover:not(:disabled) { background: rgba(229,112,137,.18); }
+.day-today { box-shadow: inset 0 0 0 1.5px rgba(217,154,55,.7); }
+.day-sel {
+  color: #fff;
+  background: linear-gradient(135deg, var(--rose), var(--coral));
+  box-shadow: 0 6px 14px rgba(229,112,137,.45);
+}
+.day-off { color: #c9b3ab; cursor: not-allowed; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 9px; }
+.chip {
+  border: 1.5px solid rgba(122,36,56,.16); background: #fff; cursor: pointer;
+  border-radius: 14px; padding: 9px 14px; font-family: inherit;
+  display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15;
+  transition: all .15s;
+}
+.chip-label { font-weight: 700; color: var(--ink); font-size: 14px; }
+.chip-time { font-size: 12px; color: var(--inkSoft); }
+.chip:hover { border-color: var(--rose); }
+.chip-on { border-color: transparent; background: linear-gradient(135deg, var(--rose), var(--coral)); }
+.chip-on .chip-label, .chip-on .chip-time { color: #fff; }
+.custom-time {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 14px; padding-top: 14px; border-top: 1px dashed rgba(122,36,56,.18);
+  font-size: 14px; color: var(--inkSoft); font-weight: 600;
+}
+.custom-time input {
+  font-family: inherit; font-size: 15px; font-weight: 700; color: var(--wine);
+  border: 1.5px solid rgba(122,36,56,.18); border-radius: 10px; padding: 8px 10px;
+  background: #fff;
+}
+.custom-time input:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+
+.cuisine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cui {
+  position: relative; text-align: left; cursor: pointer; font-family: inherit;
+  background: var(--panel); border: 1.5px solid transparent; border-radius: 16px;
+  padding: 13px 13px 12px; display: flex; flex-direction: column; gap: 2px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.22); transition: transform .14s, border-color .14s, box-shadow .14s;
+}
+.cui:hover { transform: translateY(-2px); }
+.cui-emoji { font-size: 26px; }
+.cui-label { font-weight: 800; color: var(--ink); font-size: 15px; }
+.cui-note { font-size: 12px; color: var(--inkSoft); }
+.cui-on { border-color: var(--gold); box-shadow: 0 8px 22px rgba(240,182,90,.4); }
+.cui-check {
+  position: absolute; top: 10px; right: 10px; width: 24px; height: 24px;
+  background: linear-gradient(135deg, var(--rose), var(--coral)); color: #fff;
+  border-radius: 50%; display: grid; place-items: center;
+}
+
+.summary { width: 100%; text-align: left; margin-top: 6px; display: flex; flex-direction: column; }
+.summary.tight { margin-top: 14px; }
+.srow {
+  display: grid; grid-template-columns: 30px 78px 1fr; align-items: center; gap: 10px;
+  padding: 13px 4px;
+}
+.srow + .srow { border-top: 1px solid rgba(122,36,56,.12); }
+.srow-ico { color: var(--rose); display: grid; place-items: center; }
+.srow-label { color: var(--inkSoft); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
+.srow-val { color: var(--ink); font-weight: 700; font-size: 15px; text-align: right; }
+.err { color: #ffd0c2; font-size: 14px; margin: 4px 0 0; }
+.link-btn { text-decoration: none; margin-top: 12px; }
+.intro { color: var(--cream); font-size: 17px; line-height: 1.5; margin: 2px auto 4px; max-width: 26ch; opacity: .95; }
+.text-input {
+  width: 100%; font-family: inherit; font-size: 16px; font-weight: 600; color: var(--ink);
+  background: #fff; border: 1.5px solid rgba(122,36,56,.18); border-radius: 12px; padding: 13px 14px;
+}
+.text-input::placeholder { color: #b89a93; font-weight: 500; }
+.text-input:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, .scene, .glow, .embers span, .hearts-top, .spark, .float-soft { animation: none !important; transition: none !important; }
+  .embers { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="embers" aria-hidden="true"></div>
+  <main class="stage"><div id="app"></div></main>
+</div>
+
+<noscript>
+  <p style="color:#fdf2e9;text-align:center;padding:40px;">Please enable JavaScript to view this invitation.</p>
+</noscript>
+
+<script>
+/* ────────────────────────────────────────────────────────────
+   EDIT THESE IF NEEDED
+   ──────────────────────────────────────────────────────────── */
+const SENDER_NAME = "Nick";
+// Your email is kept private via a FormSubmit ALIAS TOKEN, so your real
+// address never appears in this public code.
+// HOW TO GET YOUR TOKEN:
+//   1. Search your inbox for the "FormSubmit" confirmation email.
+//   2. It contains a private link like  https://formsubmit.co/ajax/abc123def456
+//   3. Copy the random part after /ajax/  and paste it below.
+const FORM_TOKEN = "1f1eea237c0715146e24983aa13923f6";
+// Advanced: leave "" to use the token above, or paste a full endpoint URL
+// (e.g. a Formspree URL) to use that instead.
+const FORM_ENDPOINT_OVERRIDE = "";
+const FORM_ENDPOINT = FORM_ENDPOINT_OVERRIDE || ("https://formsubmit.co/ajax/" + FORM_TOKEN);
+/* ──────────────────────────────────────────────────────────── */
+
+const CUISINES = [
+  { id: "italian",  label: "Italian",       emoji: "🍝", note: "Pasta & candlelight" },
+  { id: "japanese", label: "Japanese",      emoji: "🍣", note: "Sushi & sake" },
+  { id: "mexican",  label: "Mexican",       emoji: "🌮", note: "Tacos & spice" },
+  { id: "indian",   label: "Indian",        emoji: "🍛", note: "Rich & aromatic" },
+  { id: "french",   label: "French",        emoji: "🥐", note: "Classic romance" },
+  { id: "thai",     label: "Thai",          emoji: "🍜", note: "Fragrant & fresh" },
+  { id: "steak",    label: "Steakhouse",    emoji: "🥩", note: "Proper feast" },
+  { id: "plant",    label: "Plant-based",   emoji: "🌿", note: "Light & green" },
+  { id: "med",      label: "Mediterranean", emoji: "🫒", note: "Sunny plates" },
+  { id: "surprise", label: "Surprise me",   emoji: "✨", note: "You choose" },
+];
+
+const TIME_CHIPS = [
+  { v: "11:00", label: "Brunch" },
+  { v: "13:00", label: "Lunch" },
+  { v: "15:30", label: "Coffee" },
+  { v: "18:00", label: "Sunset" },
+  { v: "19:30", label: "Dinner" },
+];
+
+const ICONS = {
+  heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/>',
+  calendar: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  utensils: '<path d="M3 2v7c0 1.1.9 2 2 2a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+  cleft: '<path d="m15 18-6-6 6-6"/>',
+  cright: '<path d="m9 18 6-6-6-6"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  send: '<line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+  spark: '<path d="m12 3 1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/>',
+  aright: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  aleft: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  mappin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+};
+
+function esc(str) {
+  return String(str == null ? "" : str).replace(/[&<>"']/g, function (ch) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+  });
+}
+
+function icon(name, opt) {
+  opt = opt || {};
+  const size = opt.size || 20;
+  const filled = !!opt.fill;
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size +
+    '" viewBox="0 0 24 24" fill="' + (filled ? 'currentColor' : 'none') +
+    '" stroke="' + (filled ? 'none' : 'currentColor') +
+    '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    (ICONS[name] || '') + '</svg>';
+}
+
+const today = (function () { const t = new Date(); t.setHours(0, 0, 0, 0); return t; })();
+
+let state = {
+  screen: "ask",
+  name: "",
+  date: null,
+  time: "",
+  cuisine: null,
+  restaurant: "",
+  view: new Date(today.getFullYear(), today.getMonth(), 1),
+  status: "idle",
+  errMsg: "",
+  declineSent: false,
+};
+
+function fmtTime(hhmm) {
+  if (!hhmm) return "";
+  const p = hhmm.split(":").map(Number);
+  const h = p[0], m = p[1];
+  const ap = h >= 12 ? "pm" : "am";
+  const h12 = ((h + 11) % 12) + 1;
+  return h12 + ":" + String(m).padStart(2, "0") + " " + ap;
+}
+function fmtDate(d) {
+  if (!d) return "";
+  return d.toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+function sameDay(a, b) {
+  return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+function cuisineObj() { return CUISINES.find(function (c) { return c.id === state.cuisine; }); }
+function summary() {
+  const c = cuisineObj();
+  return { date: fmtDate(state.date), time: fmtTime(state.time), cuisine: c ? c.label : "" };
+}
+function canContinue() { return state.name.trim() && state.date && state.time && cuisineObj(); }
+
+
+async function sendIt() {
+  const s = summary(); const c = cuisineObj();
+  const endpoint = FORM_ENDPOINT;
+  setState({ status: "sending", errMsg: "" });
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        _subject: (state.name.trim() || "Someone") + " said yes — it's a date! " + s.date,
+        _template: "table",
+        _captcha: "false",
+        Name: state.name.trim() || "—",
+        Answer: "Yes! 💛",
+        Date: s.date,
+        Time: s.time,
+        Cuisine: (c ? c.emoji : "") + " " + s.cuisine,
+        Restaurant: state.restaurant.trim() || "—",
+      }),
+    });
+    if (!res.ok) throw new Error("send failed");
+    setState({ status: "sent" });
+  } catch (e) {
+    setState({ status: "error", errMsg: "Couldn’t send just now — check your connection and try again." });
+  }
+}
+
+async function sendDecline() {
+  if (state.declineSent) return;
+  setState({ declineSent: true }, false);
+  const endpoint = FORM_ENDPOINT;
+  const named = state.name.trim();
+  try {
+    await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        _subject: named ? named + " said no 😔" : "Aw — they said no 😔",
+        _template: "table",
+        _captcha: "false",
+        Name: named || "—",
+        Answer: "No 😔",
+        Date: "—",
+        Time: "—",
+        Cuisine: "—",
+        Restaurant: "—",
+      }),
+    });
+  } catch (e) { /* silent — the decliner shouldn't see an error */ }
+}
+
+function rowHTML(ic, label, val) {
+  return '<div class="srow"><span class="srow-ico">' + ic + '</span><span class="srow-label">' +
+    label + '</span><span class="srow-val">' + val + "</span></div>";
+}
+function rowsHTML() {
+  const c = cuisineObj();
+  let html = "";
+  if (state.name.trim()) html += rowHTML(icon("user", { size: 18 }), "From", esc(state.name.trim()));
+  html += rowHTML(icon("calendar", { size: 18 }), "Date", fmtDate(state.date));
+  html += rowHTML(icon("clock", { size: 18 }), "Time", fmtTime(state.time));
+  html += rowHTML(icon("utensils", { size: 18 }), "Cuisine", c.emoji + " " + c.label);
+  if (state.restaurant.trim()) html += rowHTML(icon("mappin", { size: 18 }), "Spot", esc(state.restaurant.trim()));
+  return html;
+}
+
+function calendarHTML() {
+  const v = state.view, y = v.getFullYear(), m = v.getMonth();
+  const startPad = new Date(y, m, 1).getDay();
+  const daysIn = new Date(y, m + 1, 0).getDate();
+  const canPrev = new Date(y, m, 1) > new Date(today.getFullYear(), today.getMonth(), 1);
+  let cells = "";
+  for (let i = 0; i < startPad; i++) cells += "<span></span>";
+  for (let d = 1; d <= daysIn; d++) {
+    const cur = new Date(y, m, d);
+    const past = cur < today, sel = sameDay(cur, state.date), isToday = sameDay(cur, today);
+    const cls = "day" + (sel ? " day-sel" : "") + (past ? " day-off" : "") + (isToday && !sel ? " day-today" : "");
+    cells += '<button class="' + cls + '" ' + (past ? "disabled" : "") +
+      ' aria-pressed="' + sel + '" data-day="' + y + "-" + m + "-" + d + '">' + d + "</button>";
+  }
+  const title = v.toLocaleDateString("en-ZA", { month: "long", year: "numeric" });
+  const dow = ["S", "M", "T", "W", "T", "F", "S"].map(function (d) { return '<span class="dow">' + d + "</span>"; }).join("");
+  return '<div class="card cal"><div class="cal-head">' +
+    '<button class="cal-nav" data-prev ' + (canPrev ? "" : "disabled") + ' aria-label="Previous month">' + icon("cleft") + "</button>" +
+    '<span class="cal-title">' + title + "</span>" +
+    '<button class="cal-nav" data-next aria-label="Next month">' + icon("cright") + "</button></div>" +
+    '<div class="cal-grid cal-dow">' + dow + "</div>" +
+    '<div class="cal-grid">' + cells + "</div></div>";
+}
+
+function screenHTML() {
+  const s = state.screen;
+
+  if (s === "ask") {
+    return '<section class="scene center">' +
+      '<div class="hearts-top">' + icon("heart", { size: 20, fill: true }) + "</div>" +
+      '<p class="eyebrow">an invitation</p>' +
+      '<p class="intro">Hi you 👋 I made this little page just to ask you one thing…</p>' +
+      '<h1 class="display">Would you like<br>to go on a date<br>with <span class="name">' + SENDER_NAME + "</span>?</h1>" +
+      '<div class="btn-row">' +
+        '<button class="btn btn-yes" data-go="plan">' + icon("heart", { size: 18, fill: true }) + " Yes</button>" +
+        '<button class="btn btn-ghost" data-no>No</button>' +
+      "</div></section>";
+  }
+
+  if (s === "sure") {
+    return '<section class="scene center">' +
+      '<div class="big-emoji">🥺</div>' +
+      '<h1 class="display sm">Aw — are you sure?</h1>' +
+      '<p class="sub">It would just be one lovely evening.</p>' +
+      '<div class="btn-row col">' +
+        '<button class="btn btn-yes wide" data-go="plan">' + icon("heart", { size: 18, fill: true }) + " Okay, yes!</button>" +
+        '<button class="btn btn-quiet" data-go="declined">I’m sure</button>' +
+      "</div></section>";
+  }
+
+  if (s === "declined") {
+    return '<section class="scene center">' +
+      '<div class="big-emoji">💛</div>' +
+      '<h1 class="display sm">All good.</h1>' +
+      '<p class="sub">Thanks for being honest — no hard feelings at all. Take care.</p>' +
+      '<button class="btn btn-quiet" data-go="ask">' + icon("aleft", { size: 16 }) + " Back</button></section>";
+  }
+
+  if (s === "plan") {
+    const chips = TIME_CHIPS.map(function (t) {
+      return '<button class="chip' + (state.time === t.v ? " chip-on" : "") + '" data-chip="' + t.v + '">' +
+        '<span class="chip-label">' + t.label + '</span><span class="chip-time">' + fmtTime(t.v) + "</span></button>";
+    }).join("");
+    const cuis = CUISINES.map(function (c) {
+      const on = state.cuisine === c.id;
+      return '<button class="cui' + (on ? " cui-on" : "") + '" data-cuisine="' + c.id + '" aria-pressed="' + on + '">' +
+        '<span class="cui-emoji">' + c.emoji + '</span>' +
+        '<span class="cui-label">' + c.label + '</span>' +
+        '<span class="cui-note">' + c.note + "</span>" +
+        (on ? '<span class="cui-check">' + icon("check", { size: 14 }) + "</span>" : "") + "</button>";
+    }).join("");
+    return '<section class="scene">' +
+      '<header class="plan-head"><div class="yay">🎉 Yes! Let’s plan it</div>' +
+      '<p class="sub center-t">Pick what works for you.</p></header>' +
+      '<h2 class="step">' + icon("user", { size: 17 }) + " First — who’s this?</h2>" +
+      '<div class="card"><input class="text-input" type="text" data-name placeholder="Your name" value="' + esc(state.name) + '" aria-label="Your name" autocomplete="name" maxlength="60"></div>' +
+      '<h2 class="step">' + icon("calendar", { size: 17 }) + " Choose a day</h2>" + calendarHTML() +
+      '<h2 class="step">' + icon("clock", { size: 17 }) + " Pick a time</h2>" +
+      '<div class="card"><div class="chips">' + chips + "</div>" +
+        '<label class="custom-time"><span>or pick your own</span>' +
+        '<input type="time" value="' + state.time + '" aria-label="Custom time"></label></div>' +
+      '<h2 class="step">' + icon("utensils", { size: 17 }) + " What sounds good?</h2>" +
+      '<div class="cuisine-grid">' + cuis + "</div>" +
+      '<h2 class="step">' + icon("mappin", { size: 17 }) + " Any restaurant in mind?</h2>" +
+      '<div class="card"><input class="text-input" type="text" data-restaurant placeholder="Optional — suggest a spot or two" value="' + esc(state.restaurant) + '" aria-label="Restaurant suggestions" maxlength="120"></div>' +
+      '<button class="btn btn-yes full" ' + (canContinue() ? "" : "disabled") + ' data-go="confirm">Review my plans ' + icon("aright", { size: 18 }) + "</button>" +
+      '<button class="btn btn-quiet center-self" data-go="ask">' + icon("aleft", { size: 16 }) + " Back</button></section>";
+  }
+
+  if (s === "confirm") {
+    if (state.status !== "sent") {
+      const fallback = state.status === "error"
+        ? '<p class="err">' + state.errMsg + "</p>" +
+          '<button class="btn btn-ghost full link-btn" data-send>' + icon("send", { size: 18 }) + " Try again</button>"
+        : "";
+      return '<section class="scene center">' +
+        '<div class="spark">' + icon("spark", { size: 22 }) + "</div>" +
+        '<h1 class="display sm">I can’t wait.</h1>' +
+        '<p class="sub">Here’s what you picked — send it over to ' + SENDER_NAME + ".</p>" +
+        '<div class="card summary">' + rowsHTML() + "</div>" +
+        '<button class="btn btn-yes full" data-send ' + (state.status === "sending" ? "disabled" : "") + ">" +
+          icon("send", { size: 18 }) + " " + (state.status === "sending" ? "Sending…" : "Send to " + SENDER_NAME) + "</button>" +
+        fallback +
+        '<button class="btn btn-quiet" data-go="plan">' + icon("aleft", { size: 16 }) + " Change something</button></section>";
+    }
+    const dayName = state.date.toLocaleDateString("en-ZA", { weekday: "long" });
+    return '<section class="scene center">' +
+      '<div class="big-emoji float-soft">💌</div>' +
+      '<h1 class="display sm">It’s a date!</h1>' +
+      '<p class="sub">Your answer is on its way to ' + SENDER_NAME + ". See you " + dayName + " — can’t wait.</p>" +
+      '<div class="card summary tight">' + rowsHTML() + "</div></section>";
+  }
+
+  return "";
+}
+
+function setState(patch, rerender) {
+  Object.assign(state, patch);
+  if (rerender !== false) render();
+}
+function render() {
+  document.getElementById("app").innerHTML = screenHTML();
+  if (state.screen === "ask") { noDodges = 0; lastDodge = 0; bindAsk(); }
+}
+function updateContinue() {
+  const b = document.querySelector('[data-go="confirm"]');
+  if (b) b.disabled = !canContinue();
+}
+
+// playful dodging "No" button — runs away at most MAX_DODGES times, then lets them tap
+const MAX_DODGES = 2;
+let noDodges = 0;
+let lastDodge = 0;
+function goSure() {
+  setState({ screen: "sure", status: "idle", errMsg: "" });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function dodge(btn) {
+  const now = Date.now();
+  if (now - lastDodge < 300) return; // avoid burning both dodges in one motion
+  lastDodge = now;
+  noDodges++;
+  const pad = 12;
+  const w = btn.offsetWidth, h = btn.offsetHeight;
+
+  // horizontal range: stay within the text column
+  const stage = document.querySelector(".stage");
+  const sRect = stage ? stage.getBoundingClientRect() : { left: pad, right: window.innerWidth - pad };
+  let minX = sRect.left + pad;
+  let maxX = sRect.right - w - pad;
+  if (maxX < minX) { minX = pad; maxX = Math.max(pad, window.innerWidth - w - pad); }
+
+  // vertical range: stay in the band just below the buttons, on-screen
+  const row = document.querySelector(".btn-row");
+  const rRect = row ? row.getBoundingClientRect() : null;
+  let minY = (rRect ? rRect.bottom : window.innerHeight * 0.55) + 14;
+  let maxY = window.innerHeight - h - pad;
+  if (minY > maxY) minY = maxY; // tiny screens: pin just below the buttons, still on-screen
+
+  const x = Math.floor(minX + Math.random() * Math.max(0, maxX - minX));
+  const y = Math.floor(minY + Math.random() * Math.max(0, maxY - minY));
+  btn.style.position = "fixed";
+  btn.style.margin = "0";
+  btn.style.zIndex = "50";
+  btn.style.transition = "left .28s cubic-bezier(.2,.8,.2,1), top .28s cubic-bezier(.2,.8,.2,1)";
+  btn.style.left = x + "px";
+  btn.style.top = y + "px";
+}
+function bindAsk() {
+  const no = document.querySelector("[data-no]");
+  if (!no) return;
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) { no.addEventListener("click", goSure); return; }
+  no.addEventListener("pointerenter", function (e) {
+    if (e.pointerType === "mouse" && noDodges < MAX_DODGES) dodge(no);
+  });
+  no.addEventListener("pointerdown", function (e) {
+    if (e.pointerType !== "mouse" && noDodges < MAX_DODGES) { e.preventDefault(); dodge(no); }
+  });
+  no.addEventListener("click", function (e) {
+    if (noDodges < MAX_DODGES) { e.preventDefault(); e.stopPropagation(); dodge(no); }
+    else { goSure(); }
+  });
+}
+
+// build embers
+(function () {
+  const e = document.querySelector(".embers");
+  let html = "";
+  for (let i = 0; i < 14; i++) html += '<span style="--i:' + i + '"></span>';
+  e.innerHTML = html;
+})();
+
+const app = document.getElementById("app");
+app.addEventListener("click", function (e) {
+  const go = e.target.closest("[data-go]");
+  if (go) {
+    const scr = go.getAttribute("data-go");
+    if (scr === "confirm" && !canContinue()) return;
+    if (scr === "declined") sendDecline();
+    setState({ screen: scr, status: "idle", errMsg: "" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  const day = e.target.closest("[data-day]");
+  if (day) {
+    const p = day.getAttribute("data-day").split("-").map(Number);
+    setState({ date: new Date(p[0], p[1], p[2]) });
+    return;
+  }
+  const chip = e.target.closest("[data-chip]");
+  if (chip) { setState({ time: chip.getAttribute("data-chip") }); return; }
+  const cui = e.target.closest("[data-cuisine]");
+  if (cui) { setState({ cuisine: cui.getAttribute("data-cuisine") }); return; }
+  if (e.target.closest("[data-prev]")) { const v = state.view; setState({ view: new Date(v.getFullYear(), v.getMonth() - 1, 1) }); return; }
+  if (e.target.closest("[data-next]")) { const v = state.view; setState({ view: new Date(v.getFullYear(), v.getMonth() + 1, 1) }); return; }
+  if (e.target.closest("[data-send]")) { sendIt(); return; }
+});
+app.addEventListener("change", function (e) {
+  if (e.target.matches('input[type="time"]')) setState({ time: e.target.value });
+});
+app.addEventListener("input", function (e) {
+  if (e.target.matches("[data-name]")) { setState({ name: e.target.value }, false); updateContinue(); }
+  else if (e.target.matches("[data-restaurant]")) { setState({ restaurant: e.target.value }, false); }
+});
+
+render();
+</script>
+</body>
+</html>

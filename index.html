@@ -183,6 +183,12 @@ html, body { margin: 0; padding: 0; }
   background: linear-gradient(135deg, var(--rose), var(--coral)); color: #fff;
   border-radius: 50%; display: grid; place-items: center;
 }
+.cuisine-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.cui-row { flex-direction: row; align-items: center; gap: 13px; padding: 14px 16px; }
+.cui-row .cui-emoji { font-size: 24px; }
+.cui-text { display: flex; flex-direction: column; gap: 1px; }
+.cui-row .cui-check { position: static; top: auto; right: auto; margin-left: auto; }
+.pick-hint { color: var(--creamDim); font-size: 13px; margin: -6px 4px 10px; }
 
 .summary { width: 100%; text-align: left; margin-top: 6px; display: flex; flex-direction: column; }
 .summary.tight { margin-top: 14px; }
@@ -249,18 +255,28 @@ const CUISINES = [
   { id: "french",   label: "French",        emoji: "🥐", note: "Classic romance" },
   { id: "thai",     label: "Thai",          emoji: "🍜", note: "Fragrant & fresh" },
   { id: "steak",    label: "Steakhouse",    emoji: "🥩", note: "Proper feast" },
-  { id: "plant",    label: "Plant-based",   emoji: "🌿", note: "Light & green" },
   { id: "med",      label: "Mediterranean", emoji: "🫒", note: "Sunny plates" },
   { id: "surprise", label: "Surprise me",   emoji: "✨", note: "You choose" },
 ];
 
 const TIME_CHIPS = [
+  { v: "09:00", label: "Morning" },
   { v: "11:00", label: "Brunch" },
   { v: "13:00", label: "Lunch" },
-  { v: "15:30", label: "Coffee" },
+  { v: "15:30", label: "Afternoon" },
   { v: "18:00", label: "Sunset" },
   { v: "19:30", label: "Dinner" },
 ];
+
+const ACTIVITIES = [
+  { id: "hike",   label: "Hike",      emoji: "🥾", note: "Trails & views" },
+  { id: "market", label: "Market",    emoji: "🧺", note: "Browse & graze" },
+  { id: "coffee", label: "Coffee",    emoji: "☕", note: "Easy & casual" },
+  { id: "walk",   label: "Park walk", emoji: "🌳", note: "Stroll & chat" },
+  { id: "lunch",  label: "Lunch",     emoji: "🍴", note: "Midday bite" },
+  { id: "dinner", label: "Dinner",    emoji: "🍷", note: "Evening out" },
+];
+const FOOD_ACTIVITIES = ["lunch", "dinner"];
 
 const ICONS = {
   heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/>',
@@ -276,6 +292,7 @@ const ICONS = {
   aleft: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
   user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
   mappin: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  compass: '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
 };
 
 function esc(str) {
@@ -302,7 +319,8 @@ let state = {
   name: "",
   date: null,
   time: "",
-  cuisine: null,
+  activity: null,
+  cuisines: [],
   restaurant: "",
   view: new Date(today.getFullYear(), today.getMonth(), 1),
   status: "idle",
@@ -325,16 +343,22 @@ function fmtDate(d) {
 function sameDay(a, b) {
   return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
-function cuisineObj() { return CUISINES.find(function (c) { return c.id === state.cuisine; }); }
+function cuisineObjs() { return CUISINES.filter(function (c) { return state.cuisines.indexOf(c.id) !== -1; }); }
+function cuisineLabel() { return cuisineObjs().map(function (c) { return c.emoji + " " + c.label; }).join(", "); }
+function activityObj() { return ACTIVITIES.find(function (a) { return a.id === state.activity; }); }
+function isFood() { return FOOD_ACTIVITIES.indexOf(state.activity) !== -1; }
 function summary() {
-  const c = cuisineObj();
-  return { date: fmtDate(state.date), time: fmtTime(state.time), cuisine: c ? c.label : "" };
+  return { date: fmtDate(state.date), time: fmtTime(state.time) };
 }
-function canContinue() { return state.name.trim() && state.date && state.time && cuisineObj(); }
+function canContinue() {
+  if (!(state.name.trim() && state.date && state.time && state.activity)) return false;
+  if (isFood() && state.cuisines.length === 0) return false;
+  return true;
+}
 
 
 async function sendIt() {
-  const s = summary(); const c = cuisineObj();
+  const s = summary();
   const endpoint = FORM_ENDPOINT;
   setState({ status: "sending", errMsg: "" });
   try {
@@ -349,8 +373,9 @@ async function sendIt() {
         Answer: "Yes! 💛",
         Date: s.date,
         Time: s.time,
-        Cuisine: (c ? c.emoji : "") + " " + s.cuisine,
-        Restaurant: state.restaurant.trim() || "—",
+        Activity: (function () { const a = activityObj(); return a ? a.emoji + " " + a.label : "—"; })(),
+        Cuisine: isFood() && state.cuisines.length ? cuisineLabel() : "—",
+        Location: state.restaurant.trim() || "—",
       }),
     });
     if (!res.ok) throw new Error("send failed");
@@ -377,8 +402,9 @@ async function sendDecline() {
         Answer: "No 😔",
         Date: "—",
         Time: "—",
+        Activity: "—",
         Cuisine: "—",
-        Restaurant: "—",
+        Location: "—",
       }),
     });
   } catch (e) { /* silent — the decliner shouldn't see an error */ }
@@ -389,13 +415,14 @@ function rowHTML(ic, label, val) {
     label + '</span><span class="srow-val">' + val + "</span></div>";
 }
 function rowsHTML() {
-  const c = cuisineObj();
+  const a = activityObj();
   let html = "";
   if (state.name.trim()) html += rowHTML(icon("user", { size: 18 }), "From", esc(state.name.trim()));
   html += rowHTML(icon("calendar", { size: 18 }), "Date", fmtDate(state.date));
   html += rowHTML(icon("clock", { size: 18 }), "Time", fmtTime(state.time));
-  html += rowHTML(icon("utensils", { size: 18 }), "Cuisine", c.emoji + " " + c.label);
-  if (state.restaurant.trim()) html += rowHTML(icon("mappin", { size: 18 }), "Spot", esc(state.restaurant.trim()));
+  if (a) html += rowHTML(icon("compass", { size: 18 }), "Plan", a.emoji + " " + a.label);
+  if (isFood() && state.cuisines.length) html += rowHTML(icon("utensils", { size: 18 }), "Cuisine", cuisineLabel());
+  if (state.restaurant.trim()) html += rowHTML(icon("mappin", { size: 18 }), "Place", esc(state.restaurant.trim()));
   return html;
 }
 
@@ -463,27 +490,41 @@ function screenHTML() {
         '<span class="chip-label">' + t.label + '</span><span class="chip-time">' + fmtTime(t.v) + "</span></button>";
     }).join("");
     const cuis = CUISINES.map(function (c) {
-      const on = state.cuisine === c.id;
-      return '<button class="cui' + (on ? " cui-on" : "") + '" data-cuisine="' + c.id + '" aria-pressed="' + on + '">' +
+      const on = state.cuisines.indexOf(c.id) !== -1;
+      return '<button class="cui cui-row' + (on ? " cui-on" : "") + '" data-cuisine="' + c.id + '" aria-pressed="' + on + '">' +
         '<span class="cui-emoji">' + c.emoji + '</span>' +
-        '<span class="cui-label">' + c.label + '</span>' +
-        '<span class="cui-note">' + c.note + "</span>" +
+        '<span class="cui-text"><span class="cui-label">' + c.label + '</span>' +
+        '<span class="cui-note">' + c.note + "</span></span>" +
         (on ? '<span class="cui-check">' + icon("check", { size: 14 }) + "</span>" : "") + "</button>";
     }).join("");
+    const acts = ACTIVITIES.map(function (a) {
+      const on = state.activity === a.id;
+      return '<button class="cui' + (on ? " cui-on" : "") + '" data-activity="' + a.id + '" aria-pressed="' + on + '">' +
+        '<span class="cui-emoji">' + a.emoji + '</span>' +
+        '<span class="cui-label">' + a.label + '</span>' +
+        '<span class="cui-note">' + a.note + "</span>" +
+        (on ? '<span class="cui-check">' + icon("check", { size: 14 }) + "</span>" : "") + "</button>";
+    }).join("");
+    const foodBlock = isFood()
+      ? '<h2 class="step">' + icon("utensils", { size: 17 }) + " What sounds good?</h2>" +
+        '<p class="pick-hint">Pick as many as you like.</p>' +
+        '<div class="cuisine-list">' + cuis + "</div>"
+      : "";
     return '<section class="scene">' +
       '<header class="plan-head"><div class="yay">🎉 Yes! Let’s plan it</div>' +
       '<p class="sub center-t">Pick what works for you.</p></header>' +
       '<h2 class="step">' + icon("user", { size: 17 }) + " First — who’s this?</h2>" +
       '<div class="card"><input class="text-input" type="text" data-name placeholder="Your name" value="' + esc(state.name) + '" aria-label="Your name" autocomplete="name" maxlength="60"></div>' +
+      '<h2 class="step">' + icon("compass", { size: 17 }) + " What shall we do?</h2>" +
+      '<div class="cuisine-grid">' + acts + "</div>" +
+      foodBlock +
+      '<h2 class="step">' + icon("mappin", { size: 17 }) + " Location recommendations</h2>" +
+      '<div class="card"><input class="text-input" type="text" data-restaurant placeholder="Optional — suggest a spot or two" value="' + esc(state.restaurant) + '" aria-label="Location recommendations" maxlength="120"></div>' +
       '<h2 class="step">' + icon("calendar", { size: 17 }) + " Choose a day</h2>" + calendarHTML() +
       '<h2 class="step">' + icon("clock", { size: 17 }) + " Pick a time</h2>" +
       '<div class="card"><div class="chips">' + chips + "</div>" +
         '<label class="custom-time"><span>or pick your own</span>' +
         '<input type="time" value="' + state.time + '" aria-label="Custom time"></label></div>' +
-      '<h2 class="step">' + icon("utensils", { size: 17 }) + " What sounds good?</h2>" +
-      '<div class="cuisine-grid">' + cuis + "</div>" +
-      '<h2 class="step">' + icon("mappin", { size: 17 }) + " Any restaurant in mind?</h2>" +
-      '<div class="card"><input class="text-input" type="text" data-restaurant placeholder="Optional — suggest a spot or two" value="' + esc(state.restaurant) + '" aria-label="Restaurant suggestions" maxlength="120"></div>' +
       '<button class="btn btn-yes full" ' + (canContinue() ? "" : "disabled") + ' data-go="confirm">Review my plans ' + icon("aright", { size: 18 }) + "</button>" +
       '<button class="btn btn-quiet center-self" data-go="ask">' + icon("aleft", { size: 16 }) + " Back</button></section>";
   }
@@ -611,8 +652,24 @@ app.addEventListener("click", function (e) {
   }
   const chip = e.target.closest("[data-chip]");
   if (chip) { setState({ time: chip.getAttribute("data-chip") }); return; }
+  const act = e.target.closest("[data-activity]");
+  if (act) {
+    const id = act.getAttribute("data-activity");
+    const food = FOOD_ACTIVITIES.indexOf(id) !== -1;
+    const patch = { activity: id };
+    if (!food) patch.cuisines = []; // cuisine only applies to lunch/dinner
+    setState(patch);
+    return;
+  }
   const cui = e.target.closest("[data-cuisine]");
-  if (cui) { setState({ cuisine: cui.getAttribute("data-cuisine") }); return; }
+  if (cui) {
+    const id = cui.getAttribute("data-cuisine");
+    const arr = state.cuisines.slice();
+    const i = arr.indexOf(id);
+    if (i === -1) arr.push(id); else arr.splice(i, 1);
+    setState({ cuisines: arr });
+    return;
+  }
   if (e.target.closest("[data-prev]")) { const v = state.view; setState({ view: new Date(v.getFullYear(), v.getMonth() - 1, 1) }); return; }
   if (e.target.closest("[data-next]")) { const v = state.view; setState({ view: new Date(v.getFullYear(), v.getMonth() + 1, 1) }); return; }
   if (e.target.closest("[data-send]")) { sendIt(); return; }
